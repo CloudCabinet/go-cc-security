@@ -1,0 +1,7 @@
+/vendor/src
+.idea
+/_tmp/
+/bin/
+/pkg/
+
+/node_modules/
