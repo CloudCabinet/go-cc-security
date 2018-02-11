@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"errors"
+	"os/user"
 )
 
 func (t User) IsRole(role string) bool {
@@ -24,7 +25,7 @@ func GetUser(tokenString string) User{
 	}
 	if user, ok := token.Claims.(*User); ok && token.Valid {
 		user.JWT_Key = tokenString
-		user.Locale = c.GetHeader("locale")
+
 		return user
 	}
 	panic(errors.New("Error token user"))
@@ -41,7 +42,9 @@ func GinAuthHandler() gin.HandlerFunc {
 		tokenString := c.GetHeader(header_key)
 		if len(tokenString) >= 1 {
 			tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-			c.Set("User", GetUser(tokenString))
+			user := GetUser(tokenString)
+			user.Locale = c.GetHeader("locale")
+			c.Set("User", user)
 			c.Next()
 		}else{
 			c.JSON(http.StatusBadRequest, gin.H{})
