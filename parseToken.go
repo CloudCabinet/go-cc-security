@@ -15,7 +15,7 @@ func (t User) IsRole(role string) bool {
 		return false
 	}
 }
-func GetUser(tokenString string) User{
+func GetUser(tokenString string) *User{
 	token, err := jwt.ParseWithClaims(tokenString, &User{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.secret_key), nil
 	})
