@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+	"errors"
 )
 
 func (t User) IsRole(role string) bool {
@@ -14,25 +15,34 @@ func (t User) IsRole(role string) bool {
 		return false
 	}
 }
+func GetUser(tokenString string) User{
+	token, err := jwt.ParseWithClaims(tokenString, &User{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.secret_key), nil
+	})
+	if(err!=nil){
+		panic(err)
+	}
+	if user, ok := token.Claims.(*User); ok && token.Valid {
+		user.JWT_Key = tokenString
+		user.Locale = c.GetHeader("locale")
+		return user
+	}
+	panic(errors.New("Error token user"))
+
+}
 func GinAuthHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		defer func () {
+			if r := recover(); r != nil {
+				c.JSON(http.StatusBadRequest, gin.H{})
+				c.Abort()
+			}
+		}()
 		tokenString := c.GetHeader(header_key)
 		if len(tokenString) >= 1 {
 			tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-			token, err := jwt.ParseWithClaims(tokenString, &User{}, func(token *jwt.Token) (interface{}, error) {
-				return []byte(config.secret_key), nil
-			})
-			if(err!=nil){
-				c.JSON(http.StatusBadRequest, gin.H{})
-				c.Abort()
-				return
-			}
-			if user, ok := token.Claims.(*User); ok && token.Valid {
-				user.JWT_Key = tokenString
-				user.Locale = c.GetHeader("locale")
-				c.Set("User", user)
-				c.Next()
-			}
+			c.Set("User", GetUser(tokenString))
+			c.Next()
 		}else{
 			c.JSON(http.StatusBadRequest, gin.H{})
 			c.Abort()
