@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 	"errors"
-	"os/user"
 )
 
 func (t User) IsRole(role string) bool {
