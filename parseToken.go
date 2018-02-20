@@ -59,7 +59,6 @@ func GinAuthHandler() gin.HandlerFunc {
 		tokenString := c.GetHeader(header_key)
 		if len(tokenString) >= 1 {
 			tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-			log.Println(tokenString)
 			user := GetUser(tokenString)
 			user.Locale = c.GetHeader("locale")
 			c.Set("User", user)
