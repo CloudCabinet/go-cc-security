@@ -15,6 +15,7 @@ func (t User) IsRole(role string) bool {
 		return false
 	}
 }
+var userDev User
 func GetUser(tokenString string) *User{
 	token, err := jwt.ParseWithClaims(tokenString, &User{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.secret_key), nil
@@ -30,6 +31,22 @@ func GetUser(tokenString string) *User{
 	panic(errors.New("Error token user"))
 
 }
+func SetUserDev(user User)  {
+	userDev = user
+}
+func GinAuthHandlerDev() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		defer func () {
+			if r := recover(); r != nil {
+				c.JSON(http.StatusBadRequest, gin.H{})
+				c.Abort()
+			}
+		}()
+		c.Set("User", userDev)
+		c.Next()
+	}
+}
+
 func GinAuthHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func () {
