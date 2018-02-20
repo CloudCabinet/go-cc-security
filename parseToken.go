@@ -27,7 +27,7 @@ func GetUser(tokenString string) User{
 	if user, ok := token.Claims.(*User); ok && token.Valid {
 		user.JWT_Key = tokenString
 
-		return User(user)
+		return *user
 	}
 	panic(errors.New("Error token user"))
 
