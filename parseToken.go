@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"errors"
+	"time"
 )
 
 func (t User) IsRole(role string) bool {
@@ -33,6 +34,7 @@ func GetUser(tokenString string) User{
 }
 func SetUserDev(user User)  {
 	userDev = user
+	userDev.JWT_Key = createJWT_DEV(user)
 }
 func GinAuthHandlerDev() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -69,4 +71,20 @@ func GinAuthHandler() gin.HandlerFunc {
 		}
 
 	}
+}
+
+func createJWT_DEV (user User) string{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"group_id": user.Group_id,
+		"user_id": user.User_id,
+		"roles": user.Roles,
+		"attr": user.Attr,
+		"exp": time.Now().Add(time.Hour * 12).Unix(),
+		"nbf": time.Now().Unix(),
+	})
+	tokenString, err := token.SignedString([]byte(config.secret_key))
+	if(err!=nil){
+		panic(err)
+	}
+	return tokenString;
 }
