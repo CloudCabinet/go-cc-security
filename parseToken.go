@@ -22,7 +22,7 @@ func (t User) IsRole(role string) bool {
 	}
 }
 func (t User) IsRolePanic(role string) {
-	if _, ok := t.Roles[role]; !ok {
+	if !t.IsRole(role) {
 		panic(errors.New("Access denied role"))
 	}
 }
