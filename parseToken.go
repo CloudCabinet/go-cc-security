@@ -13,7 +13,17 @@ func (t User) IsRole(role string) bool {
 	if _, ok := t.Roles[role]; ok {
 		return true
 	}else{
-		return false
+		if _, ok := t.Roles["ROLE_SUPER_USER"]; ok {
+			return true
+		}else{
+			return false
+		}
+
+	}
+}
+func (t User) IsRolePanic(role string) {
+	if _, ok := t.Roles[role]; !ok {
+		panic(errors.New("Access denied role"))
 	}
 }
 var userDev User
